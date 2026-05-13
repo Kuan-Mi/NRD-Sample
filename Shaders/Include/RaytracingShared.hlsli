@@ -437,12 +437,17 @@ MaterialProps GetMaterialProps( GeometryProps geometryProps )
     // Roughness and metalness
     coords = GetSamplingCoords( baseTexture + 1, geometryProps.uv, geometryProps.mip, MIP_SHARP );
     float3 materialProps = gIn_Textures[ NonUniformResourceIndex( baseTexture + 1 ) ].SAMPLE( coords ).xyz;
-    float roughness = saturate( materialProps.y * instanceData.emissionAndRoughnessScale.w );
-    float metalness = saturate( materialProps.z * instanceData.baseColorAndMetalnessScale.w );
+    float roughness = saturate( materialProps.g * instanceData.emissionAndRoughnessScale.w );
+    float metalness = saturate( materialProps.b );
 
     // Normal
     coords = GetSamplingCoords( baseTexture + 2, geometryProps.uv * instanceData.normalUvScale, geometryProps.mip, MIP_LESS_SHARP );
-    float2 packedNormal = gIn_Textures[ NonUniformResourceIndex( baseTexture + 2 ) ].SAMPLE( coords ).xy;
+    
+    // CHANGE: Unity's normal map
+    float4 samplePackedNormal = gIn_Textures[ NonUniformResourceIndex( baseTexture + 2 ) ].SAMPLE( coords );
+    samplePackedNormal.a *= samplePackedNormal.r;
+    float2 packedNormal = samplePackedNormal.ag;
+
     float3 N = gUseNormalMap ? Geometry::TransformLocalNormal( packedNormal, geometryProps.T, geometryProps.N ) : geometryProps.N;
     float3 T = geometryProps.T.xyz;
 
