@@ -204,11 +204,7 @@ void main( int2 pixelPos : SV_DispatchThreadId )
     float3 Xv = Geometry::ReconstructViewPosition( sampleUv, gCameraFrustum, viewZ, gOrthoMode );
     float tmin0 = gOrthoMode == 0 ? length( Xv ) : abs( Xv.z );
 
-    
-    float3 XvNear = Geometry::ReconstructViewPosition(sampleUv, gCameraFrustum, abs(gNearZ), gOrthoMode);
-    float tNear = gOrthoMode == 0 ? length(XvNear) : abs(gNearZ);
-
-    tmin0 = max( 0.0, tmin0 - tNear );
+    tmin0 *= 1.0 - abs(gNearZ / viewZ);
 
     GeometryProps geometryPropsT = CastRay( cameraRayOrigin, cameraRayDirection, 0.0, tmin0, GetConeAngleFromRoughness( 0.0, 0.0 ), gWorldTlas, FLAG_TRANSPARENT, 0 );
 
